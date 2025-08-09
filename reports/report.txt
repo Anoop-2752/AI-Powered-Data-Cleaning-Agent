@@ -1,0 +1,3 @@
+⚠️ Validation Issues Found:
+- Dataset contains 6826 missing values.
+- Invalid dates found in 'Transaction Date' column.
