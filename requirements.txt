@@ -1,0 +1,7 @@
+pandas>=1.5
+numpy
+matplotlib
+scikit-learn
+python-dateutil
+openpyxl
+rapidfuzz     # fuzzy string matching (faster than fuzzywuzzy)
