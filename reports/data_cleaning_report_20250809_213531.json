@@ -1,0 +1,28 @@
+{
+  "date": "2025-08-09T21:35:31.355812",
+  "raw_shape": [
+    10000,
+    8
+  ],
+  "processed_shape": [
+    10000,
+    8
+  ],
+  "issues": [
+    "Transaction Date: 460 invalid/unparseable entries set to NaT.",
+    "Item: 969 values marked as invalid and set to missing (NA).",
+    "Quantity: 479 values marked as invalid and set to missing (NA).",
+    "Price Per Unit: 533 values marked as invalid and set to missing (NA).",
+    "Total Spent: 502 values marked as invalid and set to missing (NA).",
+    "Payment Method: 3178 values marked as invalid and set to missing (NA).",
+    "Location: 3961 values marked as invalid and set to missing (NA).",
+    "Quantity: filled 479 missing values with median (3.0).",
+    "Price Per Unit: filled 533 missing values with median (3.0).",
+    "Total Spent: filled 502 missing values with median (8.0).",
+    "Item: filled 969 missing values with 'Unknown'.",
+    "Payment Method: filled 3178 missing values with 'Unknown'.",
+    "Location: filled 3961 missing values with 'Unknown'.",
+    "Dataset contains 460 missing values total.",
+    "Transaction Date contains 460 NaT (invalid/missing dates)."
+  ]
+}

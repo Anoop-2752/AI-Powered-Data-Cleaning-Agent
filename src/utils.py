@@ -1,37 +1,70 @@
 import os
 from datetime import datetime
+import json
 
 RAW_DATA_PATH = os.path.join("data", "raw", "cafe_sales_dirty.csv")
 PROCESSED_DATA_DIR = os.path.join("data", "processed")
-REPORTS_DIR = "reports"
+REPORTS_DIR = os.path.join("reports")
 
 def ensure_directories():
     os.makedirs(PROCESSED_DATA_DIR, exist_ok=True)
     os.makedirs(REPORTS_DIR, exist_ok=True)
 
-def get_versioned_filename(filename):
-    base, ext = os.path.splitext(filename)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return f"{base}_{timestamp}{ext}"
+def get_versioned_filename(base_name: str, ext: str = ".csv") -> str:
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{base_name}_{ts}{ext}"
 
-def save_processed_data(df, filename="cafe_sales_cleaned.csv"):
+def save_processed_data(df, base_name="cafe_sales_cleaned"):
+    """
+    Save dataframe to data/processed with a timestamped filename.
+    Returns path to saved file.
+    """
     ensure_directories()
-    versioned_name = get_versioned_filename(filename)
-    file_path = os.path.join(PROCESSED_DATA_DIR, versioned_name)
-    df.to_csv(file_path, index=False)
-    print(f"✅ Processed data saved to: {file_path}")
-    return file_path
+    filename = get_versioned_filename(base_name, ".csv")
+    path = os.path.join(PROCESSED_DATA_DIR, filename)
+    df.to_csv(path, index=False)
+    print(f"✅ Processed data saved to: {path}")
+    return path
 
-def generate_report(issues, filename="report.txt"):
+def generate_report(issues, raw_shape=None, processed_shape=None, base_name="data_cleaning_report"):
+    """
+    Save a simple text + JSON report of issues and shapes.
+    Returns path to the text report.
+    """
     ensure_directories()
-    file_path = os.path.join(REPORTS_DIR, filename)
-    with open(file_path, "w", encoding="utf-8") as f:  # ✅ Added encoding
-        if issues:
-            f.write("⚠️ Validation Issues Found:\n")
-            for issue in issues:
-                f.write(f"- {issue}\n")
-        else:
-            f.write("✅ No validation issues found.\n")
-    print(f"📄 Report saved to: {file_path}")
-    return file_path
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    txt_path = os.path.join(REPORTS_DIR, f"{base_name}_{ts}.txt")
+    json_path = os.path.join(REPORTS_DIR, f"{base_name}_{ts}.json")
 
+    lines = []
+    lines.append("Data Cleaning Report")
+    lines.append("="*30)
+    lines.append(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    if raw_shape:
+        lines.append(f"Raw shape: {raw_shape}")
+    if processed_shape:
+        lines.append(f"Processed shape: {processed_shape}")
+    lines.append("")
+    if issues:
+        lines.append("Issues / Actions:")
+        for i in issues:
+            lines.append(f"- {i}")
+    else:
+        lines.append("No issues found.")
+
+    # Write text (UTF-8 safe)
+    with open(txt_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+    # Also write a JSON record for programmatic consumption
+    meta = {
+        "date": datetime.now().isoformat(),
+        "raw_shape": raw_shape,
+        "processed_shape": processed_shape,
+        "issues": issues
+    }
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2, ensure_ascii=False)
+
+    print(f"📄 Report saved to: {txt_path}")
+    return txt_path
