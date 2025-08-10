@@ -15,22 +15,14 @@ def get_versioned_filename(base_name: str, ext: str = ".csv") -> str:
     return f"{base_name}_{ts}{ext}"
 
 def save_processed_data(df, base_name="cafe_sales_cleaned"):
-    """
-    Save dataframe to data/processed with a timestamped filename.
-    Returns path to saved file.
-    """
     ensure_directories()
     filename = get_versioned_filename(base_name, ".csv")
     path = os.path.join(PROCESSED_DATA_DIR, filename)
-    df.to_csv(path, index=False)
+    df.to_csv(path, index=False, encoding="utf-8")
     print(f"✅ Processed data saved to: {path}")
     return path
 
 def generate_report(issues, raw_shape=None, processed_shape=None, base_name="data_cleaning_report"):
-    """
-    Save a simple text + JSON report of issues and shapes.
-    Returns path to the text report.
-    """
     ensure_directories()
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     txt_path = os.path.join(REPORTS_DIR, f"{base_name}_{ts}.txt")
@@ -38,7 +30,7 @@ def generate_report(issues, raw_shape=None, processed_shape=None, base_name="dat
 
     lines = []
     lines.append("Data Cleaning Report")
-    lines.append("="*30)
+    lines.append("="*40)
     lines.append(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     if raw_shape:
         lines.append(f"Raw shape: {raw_shape}")
@@ -52,11 +44,9 @@ def generate_report(issues, raw_shape=None, processed_shape=None, base_name="dat
     else:
         lines.append("No issues found.")
 
-    # Write text (UTF-8 safe)
     with open(txt_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
-    # Also write a JSON record for programmatic consumption
     meta = {
         "date": datetime.now().isoformat(),
         "raw_shape": raw_shape,
@@ -64,7 +54,7 @@ def generate_report(issues, raw_shape=None, processed_shape=None, base_name="dat
         "issues": issues
     }
     with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(meta, f, indent=2, ensure_ascii=False)
+        json.dump(meta, f, ensure_ascii=False, indent=2)
 
     print(f"📄 Report saved to: {txt_path}")
     return txt_path

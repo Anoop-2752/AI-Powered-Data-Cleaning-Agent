@@ -6,7 +6,7 @@ from src.utils import save_processed_data, generate_report, RAW_DATA_PATH
 def main():
     print("🚀 Starting Data Cleaning Agent...\n")
 
-    # 1. Load raw data
+    # 1. Load raw
     try:
         df_raw = load_data(RAW_DATA_PATH)
     except FileNotFoundError as e:
@@ -15,13 +15,13 @@ def main():
 
     raw_shape = df_raw.shape
 
-    # 2. Clean data (returns cleaned df and list of applied fixes)
+    # 2. Clean
     df_clean, cleaning_issues = clean_data(df_raw)
 
-    # 3. Validate cleaned data (returns list of issues)
+    # 3. Validate
     validation_issues = validate_data(df_clean)
 
-    # 4. Print summary to console
+    # 4. Console summary
     print("\n📊 Cleaning summary:")
     if cleaning_issues:
         for i in cleaning_issues:
@@ -36,13 +36,9 @@ def main():
     else:
         print(" - No validation issues found.")
 
-    # 5. Save processed data and report
+    # 5. Save processed and report
     processed_path = save_processed_data(df_clean)
-    report_path = generate_report(
-        issues=cleaning_issues + validation_issues,
-        raw_shape=raw_shape,
-        processed_shape=df_clean.shape
-    )
+    report_path = generate_report(cleaning_issues + validation_issues, raw_shape=raw_shape, processed_shape=df_clean.shape)
 
     print("\n🎉 Pipeline finished.")
     print(f"Processed file: {processed_path}")
