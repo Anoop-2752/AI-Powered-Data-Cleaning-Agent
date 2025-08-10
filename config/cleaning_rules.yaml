@@ -1,16 +1,20 @@
-date_columns:
+date_ranges:
   Transaction Date:
-    min: "2023-01-01"
-    max: "2023-12-31"
+    min: "2022-01-01"
+    max: "2024-12-31"
 
-outlier_rules:
+outlier_thresholds:
   Quantity:
-    method: "zscore"   # or "iqr"
-    threshold: 3
-  Total Spent:
-    method: "iqr"
-    multiplier: 1.5
+    min: 1
+    max: 20
+  Price Per Unit:
+    min: 1
+    max: 50
+
+skip_columns:
+  - Transaction ID
 
 imputation:
-  numeric: "knn"       # options: median, mean, knn
-  categorical: "most_frequent"
+  numeric: knn       # options: knn, median, mean
+  categorical: mode  # options: mode, constant
+  text: constant     # constant fill value

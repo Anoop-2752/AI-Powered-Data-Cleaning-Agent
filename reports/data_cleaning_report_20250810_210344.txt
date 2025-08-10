@@ -1,0 +1,14 @@
+Data Cleaning Report
+========================================
+Date: 2025-08-10 21:03:44
+Raw shape: (10000, 8)
+Processed shape: (10000, 8)
+
+Issues / Actions:
+- Detected column types: {'Transaction ID': 'id', 'Item': 'categorical', 'Quantity': 'numeric', 'Price Per Unit': 'numeric', 'Total Spent': 'numeric', 'Payment Method': 'categorical', 'Location': 'categorical', 'Transaction Date': 'date'}
+- Quantity: filled 341 missing/invalid values with median (3.0).
+- Price Per Unit: filled 354 missing/invalid values with median (3.0).
+- Total Spent: filled 329 missing/invalid values with median (7.5).
+- Transaction Date: 460 invalid/unparseable entries set to NaT.
+- Dataset contains 460 missing values total.
+- Transaction Date contains 460 NaT (invalid/missing dates).
