@@ -1,54 +1,45 @@
 import pandas as pd
-import re
+import numpy as np
 
-def _looks_like_date(series):
-    # quick attempts: if pandas can parse most non-empty items -> date
-    sample = series.dropna().astype(str).head(100)
-    if sample.empty:
-        return False
-    try:
-        parsed = pd.to_datetime(sample, errors='coerce')
-        frac_parsed = parsed.notna().sum() / len(sample)
-        return frac_parsed >= 0.6
-    except Exception:
-        return False
-
-def _looks_like_numeric(series):
-    sample = series.dropna().astype(str).head(100)
-    if sample.empty:
-        return False
-    numeric_count = sample.apply(lambda x: re.fullmatch(r"-?\d+(\.\d+)?", x.strip()) is not None).sum()
-    return (numeric_count / len(sample)) >= 0.6
-
-def detect_column_types(df):
+def detect_column_types(df: pd.DataFrame) -> dict:
     """
-    Detects column types using heuristics.
-    Returns dict: column -> type in {'id','date','numeric','categorical'}
+    Automatically detect column types: id, date, numeric, categorical.
+    Returns a dict {column_name: type}.
     """
     col_types = {}
-    n = len(df)
+
     for col in df.columns:
         series = df[col]
-        # ID heuristic: very high uniqueness and values are strings with letters or mixed
-        unique_frac = df[col].nunique(dropna=True) / max(1, n)
-        if unique_frac > 0.9:
-            # if mostly alphanumeric strings -> id
-            sampled = series.dropna().astype(str).head(50)
-            if sampled.str.contains(r"[A-Za-z]").any():
-                col_types[col] = "id"
-                continue
 
-        # Date heuristic
-        if _looks_like_date(series):
-            col_types[col] = "date"
+        # 1️⃣ ID detection — high uniqueness and mostly non-null
+        if series.nunique(dropna=True) == len(series):
+            col_types[col] = "id"
             continue
 
-        # Numeric heuristic
-        if _looks_like_numeric(series):
+        # 2️⃣ Date detection
+        try:
+            parsed = pd.to_datetime(series, errors="coerce")
+            # If >80% of values successfully parse to datetime, mark as date
+            if parsed.notna().mean() > 0.8:
+                col_types[col] = "date"
+                continue
+        except Exception:
+            pass
+
+        # 3️⃣ Numeric detection
+        if pd.api.types.is_numeric_dtype(series):
             col_types[col] = "numeric"
             continue
+        try:
+            # Try coercing to numeric
+            numeric = pd.to_numeric(series, errors="coerce")
+            if numeric.notna().mean() > 0.8:
+                col_types[col] = "numeric"
+                continue
+        except Exception:
+            pass
 
-        # default to categorical
+        # 4️⃣ Default to categorical
         col_types[col] = "categorical"
 
     return col_types

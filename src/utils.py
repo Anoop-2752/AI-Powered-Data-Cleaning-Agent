@@ -22,39 +22,45 @@ def save_processed_data(df, base_name="cafe_sales_cleaned"):
     print(f"✅ Processed data saved to: {path}")
     return path
 
-def generate_report(issues, raw_shape=None, processed_shape=None, base_name="data_cleaning_report"):
-    ensure_directories()
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    txt_path = os.path.join(REPORTS_DIR, f"{base_name}_{ts}.txt")
-    json_path = os.path.join(REPORTS_DIR, f"{base_name}_{ts}.json")
+def generate_report(issues, raw_shape=None, processed_shape=None, column_types=None):
+    """Generate a text report of issues, shapes, and column type detection."""
+    from datetime import datetime
+    import os
 
-    lines = []
-    lines.append("Data Cleaning Report")
-    lines.append("="*40)
-    lines.append(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    if raw_shape:
-        lines.append(f"Raw shape: {raw_shape}")
-    if processed_shape:
-        lines.append(f"Processed shape: {processed_shape}")
-    lines.append("")
+    report_lines = []
+    report_lines.append(f"Data Cleaning Report - {datetime.now()}")
+    report_lines.append("=" * 50)
+    if raw_shape and processed_shape:
+        report_lines.append(f"Raw Shape: {raw_shape}")
+        report_lines.append(f"Processed Shape: {processed_shape}")
+        report_lines.append("")
+
     if issues:
-        lines.append("Issues / Actions:")
-        for i in issues:
-            lines.append(f"- {i}")
+        report_lines.append("Cleaning & Validation Issues:")
+        for issue in issues:
+            report_lines.append(f" - {issue}")
     else:
-        lines.append("No issues found.")
+        report_lines.append("No cleaning or validation issues detected.")
 
-    with open(txt_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
+    report_lines.append("")
 
-    meta = {
-        "date": datetime.now().isoformat(),
-        "raw_shape": raw_shape,
-        "processed_shape": processed_shape,
-        "issues": issues
-    }
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(meta, f, ensure_ascii=False, indent=2)
+    # New: Column types
+    if column_types:
+        report_lines.append("Detected Column Types:")
+        for col, ctype in column_types.items():
+            report_lines.append(f" - {col}: {ctype}")
 
-    print(f"📄 Report saved to: {txt_path}")
-    return txt_path
+    report_lines.append("=" * 50)
+
+    reports_dir = "reports"
+    os.makedirs(reports_dir, exist_ok=True)
+    filename = os.path.join(
+        reports_dir,
+        f"data_cleaning_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    )
+
+    with open(filename, "w") as f:
+        f.write("\n".join(report_lines))
+
+    return filename
+

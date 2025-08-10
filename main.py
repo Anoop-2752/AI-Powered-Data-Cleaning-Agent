@@ -4,6 +4,8 @@ from src.data_validator import validate_data
 from src.utils import save_processed_data, generate_report, RAW_DATA_PATH
 from src.config_loader import load_cleaning_config
 from src.advanced_cleaner import apply_custom_rules, advanced_imputation
+from src.column_type_detector import detect_column_types
+from src.ai_suggestions import generate_ai_suggestions
 
 
 def main():
@@ -43,6 +45,12 @@ def main():
     validation_issues = validate_data(df_clean)
     print("✅ Validation completed.")
 
+    # 7️⃣ Generate AI-powered suggestions
+    ai_suggestions = generate_ai_suggestions(df_clean)
+    print("\n🤖 AI Suggestions:")
+    for s in ai_suggestions:
+        print(f" - {s}")
+
     # 7️⃣ Print summaries
     print("\n📊 Cleaning summary:")
     if cleaning_issues:
@@ -58,13 +66,20 @@ def main():
     else:
         print(" - No validation issues found.")
 
+
+
+    # 6️⃣ Detect column types
+    column_types = detect_column_types(df_clean)
+
     # 8️⃣ Save processed data and report
     processed_path = save_processed_data(df_clean)
     report_path = generate_report(
         cleaning_issues + validation_issues,
         raw_shape=raw_shape,
-        processed_shape=df_clean.shape
+        processed_shape=df_clean.shape,
+        column_types=column_types
     )
+
 
     print("\n🎉 Pipeline finished successfully.")
     print(f"📁 Processed file saved to: {processed_path}")
