@@ -6,3 +6,5 @@ python-dateutil
 openpyxl
 rapidfuzz     # fuzzy string matching (faster than fuzzywuzzy)
 pyyaml
+groq
+python-dotenv

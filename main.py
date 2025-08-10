@@ -5,7 +5,7 @@ from src.utils import save_processed_data, generate_report, RAW_DATA_PATH
 from src.config_loader import load_cleaning_config
 from src.advanced_cleaner import apply_custom_rules, advanced_imputation
 from src.column_type_detector import detect_column_types
-from src.ai_suggestions import generate_ai_suggestions
+from src.llm_suggestions import get_llm_suggestions
 
 
 def main():
@@ -45,13 +45,10 @@ def main():
     validation_issues = validate_data(df_clean)
     print("✅ Validation completed.")
 
-    # 7️⃣ Generate AI-powered suggestions
-    ai_suggestions = generate_ai_suggestions(df_clean)
-    print("\n🤖 AI Suggestions:")
-    for s in ai_suggestions:
-        print(f" - {s}")
+    # 7️⃣ Detect column types
+    column_types = detect_column_types(df_clean)
 
-    # 7️⃣ Print summaries
+    # 8️⃣ Print cleaning & validation summaries
     print("\n📊 Cleaning summary:")
     if cleaning_issues:
         for issue in cleaning_issues:
@@ -66,12 +63,19 @@ def main():
     else:
         print(" - No validation issues found.")
 
+    # 9️⃣ AI-powered LLM suggestions (Groq)
+    ai_suggestions = get_llm_suggestions(
+        cleaning_summary="\n".join(cleaning_issues) if cleaning_issues else "No issues.",
+        validation_summary="\n".join(validation_issues) if validation_issues else "No issues."
+    )
+    print("\n🤖 AI Suggestions:")
+    if ai_suggestions:
+        for s in ai_suggestions:
+            print(f" - {s}")
+    else:
+        print(" - No AI suggestions available.")
 
-
-    # 6️⃣ Detect column types
-    column_types = detect_column_types(df_clean)
-
-    # 8️⃣ Save processed data and report
+    # 🔟 Save processed data and report
     processed_path = save_processed_data(df_clean)
     report_path = generate_report(
         cleaning_issues + validation_issues,
@@ -79,7 +83,6 @@ def main():
         processed_shape=df_clean.shape,
         column_types=column_types
     )
-
 
     print("\n🎉 Pipeline finished successfully.")
     print(f"📁 Processed file saved to: {processed_path}")
