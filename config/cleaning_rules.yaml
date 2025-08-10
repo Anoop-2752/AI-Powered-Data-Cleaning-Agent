@@ -1,0 +1,16 @@
+date_columns:
+  Transaction Date:
+    min: "2023-01-01"
+    max: "2023-12-31"
+
+outlier_rules:
+  Quantity:
+    method: "zscore"   # or "iqr"
+    threshold: 3
+  Total Spent:
+    method: "iqr"
+    multiplier: 1.5
+
+imputation:
+  numeric: "knn"       # options: median, mean, knn
+  categorical: "most_frequent"

@@ -2,11 +2,16 @@ from src.data_loader import load_data
 from src.data_cleaner import clean_data
 from src.data_validator import validate_data
 from src.utils import save_processed_data, generate_report, RAW_DATA_PATH
+from src.config_loader import load_cleaning_config
+from src.advanced_cleaner import apply_custom_rules, advanced_imputation
 
 def main():
     print("🚀 Starting Data Cleaning Agent...\n")
 
-    # 1. Load raw
+    # 1️⃣ Load cleaning config
+    config = load_cleaning_config()
+
+    # 2️⃣ Load raw data
     try:
         df_raw = load_data(RAW_DATA_PATH)
     except FileNotFoundError as e:
@@ -15,13 +20,19 @@ def main():
 
     raw_shape = df_raw.shape
 
-    # 2. Clean
-    df_clean, cleaning_issues = clean_data(df_raw)
+    # 3️⃣ Apply custom rules from config
+    df_custom = apply_custom_rules(df_raw, config)
 
-    # 3. Validate
+    # 4️⃣ Apply advanced imputation
+    df_imputed = advanced_imputation(df_custom, config)
+
+    # 5️⃣ Clean the data
+    df_clean, cleaning_issues = clean_data(df_imputed)
+
+    # 6️⃣ Validate the cleaned data
     validation_issues = validate_data(df_clean)
 
-    # 4. Console summary
+    # 7️⃣ Console summary
     print("\n📊 Cleaning summary:")
     if cleaning_issues:
         for i in cleaning_issues:
@@ -36,9 +47,13 @@ def main():
     else:
         print(" - No validation issues found.")
 
-    # 5. Save processed and report
+    # 8️⃣ Save processed data and report
     processed_path = save_processed_data(df_clean)
-    report_path = generate_report(cleaning_issues + validation_issues, raw_shape=raw_shape, processed_shape=df_clean.shape)
+    report_path = generate_report(
+        cleaning_issues + validation_issues,
+        raw_shape=raw_shape,
+        processed_shape=df_clean.shape
+    )
 
     print("\n🎉 Pipeline finished.")
     print(f"Processed file: {processed_path}")
