@@ -1,0 +1,4 @@
+reports\data_cleaning_report_20250811_201317.txt
+
+🤖 AI Suggestions:
+ - Column 'Total Spent' has 259 potential outliers.

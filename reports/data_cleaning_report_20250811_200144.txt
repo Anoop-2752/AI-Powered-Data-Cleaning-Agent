@@ -1,0 +1,21 @@
+Data Cleaning Report - 2025-08-11 20:01:44.677531
+==================================================
+Raw Shape: (50000, 11)
+Processed Shape: (50000, 11)
+
+Cleaning & Validation Issues:
+ - Detected column types: {'Model': 'categorical', 'Year': 'date', 'Region': 'categorical', 'Color': 'categorical', 'Fuel_Type': 'categorical', 'Transmission': 'categorical', 'Engine_Size_L': 'numeric', 'Mileage_KM': 'date', 'Price_USD': 'date', 'Sales_Volume': 'date', 'Sales_Classification': 'categorical'}
+
+Detected Column Types:
+ - Model: categorical
+ - Year: date
+ - Region: categorical
+ - Color: categorical
+ - Fuel_Type: categorical
+ - Transmission: categorical
+ - Engine_Size_L: numeric
+ - Mileage_KM: date
+ - Price_USD: date
+ - Sales_Volume: date
+ - Sales_Classification: categorical
+==================================================

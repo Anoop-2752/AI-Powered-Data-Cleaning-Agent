@@ -1,14 +1,16 @@
 import pandas as pd
 import numpy as np
+import warnings
 
 def detect_column_types(df: pd.DataFrame) -> dict:
     """
     Automatically detect column types:
     - id: Unique identifiers
-    - date: Date or datetime values
+    - date: Date or datetime values (with format detection)
     - numeric: Integers or floats
     - categorical: Strings or limited categories
     """
+    warnings.filterwarnings("ignore", category=UserWarning, module="pandas")
     col_types = {}
 
     def detect_date_format(sample_series):
@@ -37,22 +39,7 @@ def detect_column_types(df: pd.DataFrame) -> dict:
             col_types[col] = "id"
             continue
 
-        # 2️⃣ Date detection
-        date_fmt = detect_date_format(series)
-        if date_fmt:
-            parsed = pd.to_datetime(series, format=date_fmt, errors="coerce")
-            if parsed.notna().mean() > 0.8:
-                col_types[col] = "date"
-                continue
-        else:
-            # Only try generic parsing if column *looks* like a date
-            if series.astype(str).str.contains(r"\d{4}|\d{2}[-/]\d{2}[-/]\d{2}").mean() > 0.8:
-                parsed = pd.to_datetime(series, errors="coerce")
-                if parsed.notna().mean() > 0.8:
-                    col_types[col] = "date"
-                    continue
-
-        # 3️⃣ Numeric detection
+        # 2️⃣ Numeric detection FIRST (prevents big numbers from being parsed as dates)
         if pd.api.types.is_numeric_dtype(series):
             col_types[col] = "numeric"
             continue
@@ -63,6 +50,25 @@ def detect_column_types(df: pd.DataFrame) -> dict:
                 continue
         except Exception:
             pass
+
+        # 3️⃣ Date detection
+        date_fmt = detect_date_format(series)
+        if date_fmt:
+            parsed = pd.to_datetime(series, format=date_fmt, errors="coerce")
+            if parsed.notna().mean() > 0.8:
+                years = parsed.dt.year.dropna()
+                if (years.between(1900, 2100).mean() > 0.8):
+                    col_types[col] = "date"
+                    continue
+        else:
+            # Generic parsing only if column *looks* like a date
+            if series.astype(str).str.contains(r"\d{4}|\d{2}[-/]\d{2}[-/]\d{2}").mean() > 0.8:
+                parsed = pd.to_datetime(series, errors="coerce", infer_datetime_format=True)
+                if parsed.notna().mean() > 0.8:
+                    years = parsed.dt.year.dropna()
+                    if (years.between(1900, 2100).mean() > 0.8):
+                        col_types[col] = "date"
+                        continue
 
         # 4️⃣ Default categorical
         col_types[col] = "categorical"

@@ -6,11 +6,15 @@ from src.config_loader import load_cleaning_config
 from src.advanced_cleaner import apply_custom_rules, advanced_imputation
 from src.column_type_detector import detect_column_types
 from src.ai_suggestions import generate_ai_suggestions
-from src.llm_suggestions import get_llm_suggestions
 import pandas as pd
+import os
 
-
-def main():
+def run_data_cleaning(file_path=None):
+    """
+    Main function to run the data cleaning pipeline.
+    If file_path is provided, uses that; otherwise uses RAW_DATA_PATH.
+    Returns cleaned DataFrame, report text, and processed file path.
+    """
     print("🚀 Starting Data Cleaning Agent...\n")
 
     # 1️⃣ Load cleaning configuration
@@ -23,11 +27,11 @@ def main():
 
     # 2️⃣ Load raw dataset
     try:
-        df_raw = load_data(RAW_DATA_PATH)
+        df_raw = load_data(file_path if file_path else RAW_DATA_PATH)
         print(f"✅ Raw data loaded: {df_raw.shape[0]} rows, {df_raw.shape[1]} columns.")
     except FileNotFoundError as e:
         print(f"❌ {e}")
-        return
+        return None, None, None
 
     raw_shape = df_raw.shape
 
@@ -73,12 +77,17 @@ def main():
     for s in ai_suggestions:
         report_with_ai += f" - {s}\n"
 
-    # Save final report file
-    report_path = f"reports/data_cleaning_report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt"
-    with open(report_path, "w", encoding="utf-8") as f:
+    # Save final report with timestamp
+    os.makedirs("reports", exist_ok=True)
+    timestamped_path = f"reports/data_cleaning_report_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    with open(timestamped_path, "w", encoding="utf-8") as f:
         f.write(report_with_ai)
 
-    # ✅ Final status messages
+    # Save latest report to a fixed file
+    latest_path = "reports/last_report.txt"
+    with open(latest_path, "w", encoding="utf-8") as f:
+        f.write(report_with_ai)
+
     print("\n📊 Cleaning summary:")
     if cleaning_issues:
         for issue in cleaning_issues:
@@ -95,8 +104,11 @@ def main():
 
     print("\n🎉 Pipeline finished successfully.")
     print(f"📁 Processed file saved to: {processed_path}")
-    print(f"📝 Report file saved to: {report_path}")
+    print(f"📝 Report file saved to: {timestamped_path}")
+    print(f"📝 Latest report saved to: {latest_path}")
+
+    return df_clean, report_with_ai, processed_path
 
 
 if __name__ == "__main__":
-    main()
+    run_data_cleaning()
