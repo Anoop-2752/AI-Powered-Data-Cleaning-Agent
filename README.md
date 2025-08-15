@@ -1,4 +1,4 @@
-# AI-Powered-Data-Cleaning-Agent
+# AI-Powered-Data-Cleaning-Agent.
 
 How to run:
 1. Put `cafe_sales_dirty.csv` into `data/raw/`
